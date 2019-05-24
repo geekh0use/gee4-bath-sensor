@@ -21,6 +21,7 @@ class FuroDaemon < DaemonSpawn::Base
     SerialPort.open '/dev/serial0' do |furo|
       loop do
         furo.readline.chomp
+          .tap { |it| puts it }
           .then { |line| line =~ /^::rc=/ ? [line] : [] }
           .map { |it|
             values = it.split(/:/).map { |e| e.split(/=/) }
@@ -39,9 +40,10 @@ class FuroDaemon < DaemonSpawn::Base
   end
 end
 
-FuroDaemon.spawn!({
-  :working_dir => "./",
-  :pid_file => "./pid.log",
-  :log_file => "./furo.log"
-})
+FuroDaemon.spawn!(
+  working_dir: File.dirname(__FILE__),
+  pid_file: "/var/run/furo.pid",
+  log_file: "/var/log/furo.log",
+  sync_log: true
+)
 
